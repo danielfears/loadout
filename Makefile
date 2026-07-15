@@ -13,6 +13,7 @@ lint:
 test:
 	./tests/test-cli.sh
 	./tests/test-idempotence.sh
+	./tests/test-azure-source.sh
 	./tests/test-manifests.sh
 
 integration:

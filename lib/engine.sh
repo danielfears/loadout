@@ -3,6 +3,7 @@
 loadout_run_engine() {
     loadout_detect_platform
     loadout_ensure_wsl_systemd
+    loadout_reconcile_legacy_azure_source
     loadout_ensure_apt_packages
     loadout_ensure_azure_cli
     loadout_ensure_release_tools

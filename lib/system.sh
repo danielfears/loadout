@@ -158,11 +158,112 @@ loadout_ensure_docker() {
     fi
 }
 
+loadout_azure_source_files() {
+    local source
+    for source in \
+        /etc/apt/sources.list \
+        /etc/apt/sources.list.d/*.list \
+        /etc/apt/sources.list.d/*.sources; do
+        [ -r "$source" ] || continue
+        grep -Fqi 'https://packages.microsoft.com/repos/azure-cli' "$source" ||
+            continue
+        printf '%s\n' "$source"
+    done
+}
+
+loadout_deb822_field_has_word() {
+    local source=$1
+    local field=$2
+    local expected=$3
+    awk -F: -v field="$field" -v expected="$expected" '
+        tolower($1) == field {
+            value=$0
+            sub(/^[^:]*:[[:space:]]*/, "", value)
+            count=split(value, words, /[[:space:]]+/)
+            for (i=1; i<=count; i++) {
+                if (words[i] == expected) {
+                    found=1
+                }
+            }
+        }
+        END { exit !found }
+    ' "$source"
+}
+
+loadout_azure_source_is_valid() {
+    local source=$1
+    local signed_by
+    case "$source" in
+        *.sources)
+            loadout_deb822_field_has_word "$source" types deb &&
+                grep -Eqi '^URIs:[[:space:]]*https://packages\.microsoft\.com/repos/azure-cli/?[[:space:]]*$' "$source" &&
+                loadout_deb822_field_has_word "$source" suites noble &&
+                loadout_deb822_field_has_word "$source" components main ||
+                return 1
+            if grep -Eqi '^Architectures:' "$source"; then
+                loadout_deb822_field_has_word \
+                    "$source" architectures "$LOADOUT_DEB_ARCH" ||
+                    return 1
+            fi
+            signed_by=$(awk -F: '
+                tolower($1) == "signed-by" {
+                    sub(/^[[:space:]]+/, "", $2)
+                    print $2
+                    exit
+                }
+            ' "$source")
+            ;;
+        *)
+            local line
+            line=$(grep -Ei \
+                '^[[:space:]]*deb .*https://packages\.microsoft\.com/repos/azure-cli/?[[:space:]]+noble[[:space:]]+main([[:space:]]|$)' \
+                "$source" | sed -n '1p')
+            [ -n "$line" ] || return 1
+            signed_by=$(sed -n \
+                's/.*signed-by=\([^] ,]*\).*/\1/p' <<<"$line")
+            ;;
+    esac
+    [ -n "$signed_by" ] && [ -r "$signed_by" ]
+}
+
+loadout_find_valid_azure_source() {
+    local excluded=${1:-}
+    local source
+    while IFS= read -r source; do
+        [ "$source" = "$excluded" ] && continue
+        if loadout_azure_source_is_valid "$source"; then
+            printf '%s\n' "$source"
+            return 0
+        fi
+    done < <(loadout_azure_source_files)
+    return 1
+}
+
 loadout_azure_repo_matches() {
-    local source=/etc/apt/sources.list.d/azure-cli.list
-    [ -r /usr/share/keyrings/microsoft.gpg ] &&
-        [ -r "$source" ] &&
-        grep -Fq 'https://packages.microsoft.com/repos/azure-cli/ noble main' "$source"
+    loadout_find_valid_azure_source >/dev/null
+}
+
+loadout_legacy_azure_source_conflicts() {
+    local legacy=/etc/apt/sources.list.d/azure-cli.list
+    [ -r "$legacy" ] &&
+        grep -Fq 'signed-by=/usr/share/keyrings/microsoft.gpg' "$legacy" &&
+        grep -Fq 'https://packages.microsoft.com/repos/azure-cli/ noble main' \
+            "$legacy" &&
+        loadout_find_valid_azure_source "$legacy" >/dev/null
+}
+
+loadout_reconcile_legacy_azure_source() {
+    local legacy=/etc/apt/sources.list.d/azure-cli.list
+    local backup
+    loadout_legacy_azure_source_conflicts || return 0
+
+    loadout_section 'APT source compatibility'
+    loadout_change 'retire Loadout legacy Azure CLI source'
+    if loadout_is_apply; then
+        backup="${legacy}.bak.$(date +%Y%m%d%H%M%S)"
+        sudo mv "$legacy" "$backup"
+        loadout_warn "retired conflicting source to $backup"
+    fi
 }
 
 loadout_install_azure_repo() (
@@ -178,12 +279,19 @@ loadout_install_azure_repo() (
         --output "$key"
     gpg --dearmor --batch --yes \
         --output "$temporary/microsoft.gpg" "$key"
+    sudo install -d -m 0755 /etc/apt/keyrings
     sudo install -m 0644 "$temporary/microsoft.gpg" \
-        /usr/share/keyrings/microsoft.gpg
-    printf 'deb [arch=%s signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/azure-cli/ noble main\n' \
-        "$LOADOUT_DEB_ARCH" >"$temporary/azure-cli.list"
-    sudo install -m 0644 "$temporary/azure-cli.list" \
-        /etc/apt/sources.list.d/azure-cli.list
+        /etc/apt/keyrings/microsoft.gpg
+    cat >"$temporary/azure-cli.sources" <<EOF
+Types: deb
+URIs: https://packages.microsoft.com/repos/azure-cli/
+Suites: noble
+Components: main
+Architectures: $LOADOUT_DEB_ARCH
+Signed-By: /etc/apt/keyrings/microsoft.gpg
+EOF
+    sudo install -m 0644 "$temporary/azure-cli.sources" \
+        /etc/apt/sources.list.d/azure-cli.sources
 )
 
 loadout_ensure_azure_cli() {
@@ -194,6 +302,10 @@ loadout_ensure_azure_cli() {
     if loadout_azure_repo_matches; then
         loadout_ok 'Microsoft Azure CLI repository'
     else
+        if [ -n "$(loadout_azure_source_files)" ]; then
+            loadout_die \
+                'An Azure CLI APT source exists but its signing key or Noble configuration is invalid'
+        fi
         repo_drift=1
         loadout_change 'configure the Microsoft Azure CLI repository'
     fi

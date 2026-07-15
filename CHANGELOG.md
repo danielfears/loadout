@@ -2,6 +2,17 @@
 
 All notable changes to Loadout are documented here.
 
+## 0.1.1 - 2026-07-16
+
+### Fixed
+
+- Adopt an existing valid Azure CLI APT source in either Deb822 or legacy
+  one-line format.
+- Retire the conflicting legacy source created by Loadout 0.1.0 when a valid
+  modern source already exists.
+- Install new Azure CLI sources with the modern `/etc/apt/keyrings` and
+  Deb822 conventions.
+
 ## 0.1.0 - 2026-07-15
 
 ### Added
