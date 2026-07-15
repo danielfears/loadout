@@ -1,0 +1,9 @@
+# tool	category	why it remains optional
+Argo CD CLI	GitOps	Install when the target platform uses Argo CD rather than Flux.
+Terragrunt	IaC	Useful for large multi-state estates, but adds a Terraform abstraction.
+Grype	Supply chain	Add when an Anchore-native CVE workflow is required; Trivy already covers scanning.
+kubectx and kubens	Kubernetes	Convenient context switching, while k9s already provides interactive navigation.
+Vault	Secrets	Install when HashiCorp Vault is part of the target platform.
+OpenTofu	IaC	Add for OpenTofu estates; avoid managing the same stack with two Terraform-compatible CLIs.
+Crossplane CLI	Platform APIs	Install when composing cloud platforms through Crossplane.
+Dagger	CI engines	Add when pipelines are intentionally authored as portable code.

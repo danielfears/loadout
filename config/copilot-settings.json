@@ -1,0 +1,12 @@
+{
+  "allowedUrls": [
+    "https://api.github.com",
+    "https://github.com",
+    "https://learn.microsoft.com"
+  ],
+  "contextTier": "long_context",
+  "effortLevel": "max",
+  "logLevel": "all",
+  "model": "gpt-5.6-sol",
+  "theme": "github"
+}

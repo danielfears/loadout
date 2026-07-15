@@ -1,0 +1,12 @@
+*.bak
+*.bak.*
+.env
+*.env
+*.key
+*.pem
+*.pfx
+*.tfstate
+*.tfstate.*
+.loadout/
+loadout-test.*
+dist/

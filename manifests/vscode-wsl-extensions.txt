@@ -1,0 +1,14 @@
+github.vscode-github-actions@0.32.3
+hashicorp.terraform@2.39.4
+mechatroner.rainbow-csv@3.24.1
+ms-azure-devops.azure-pipelines@1.261.1
+ms-azuretools.vscode-bicep@0.45.15
+ms-azuretools.vscode-docker@2.0.0
+ms-azuretools.vscode-azureterraform@0.10.2
+ms-kubernetes-tools.vscode-kubernetes-tools@1.4.0
+ms-python.debugpy@2026.6.0
+ms-python.python@2026.4.0
+ms-python.vscode-pylance@2026.2.1
+ms-python.vscode-python-envs@1.36.0
+ms-vscode.powershell@2025.4.0
+redhat.vscode-yaml@1.25.2026071508

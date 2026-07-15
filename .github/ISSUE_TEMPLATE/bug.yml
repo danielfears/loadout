@@ -1,0 +1,41 @@
+name: Bug report
+description: Report a reproducible Loadout failure
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Do not include credentials, tokens, private URLs or personal data.
+  - type: input
+    id: version
+    attributes:
+      label: Loadout version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Ubuntu 24.04 on WSL2
+        - Ubuntu 24.04 native
+        - Ubuntu 24.04 container test
+    validations:
+      required: true
+  - type: dropdown
+    id: architecture
+    attributes:
+      label: Architecture
+      options:
+        - ARM64
+        - AMD64
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Include the command, expected result and sanitised output.
+    validations:
+      required: true

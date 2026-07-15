@@ -1,0 +1,8 @@
+{
+  "chat.viewSessions.orientation": "stacked",
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "terminal.integrated.initialHint": false,
+  "update.showReleaseNotes": false,
+  "workbench.colorTheme": "Dracula Theme",
+  "workbench.startupEditor": "none"
+}

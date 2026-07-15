@@ -1,0 +1,151 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2034
+
+set -Eeuo pipefail
+
+SOURCE=${BASH_SOURCE[0]}
+while [ -L "$SOURCE" ]; do
+    SOURCE_DIR=$(cd -P "$(dirname "$SOURCE")" && pwd)
+    SOURCE=$(readlink "$SOURCE")
+    [[ "$SOURCE" != /* ]] && SOURCE="$SOURCE_DIR/$SOURCE"
+done
+LOADOUT_ROOT=$(cd -P "$(dirname "$SOURCE")/.." && pwd)
+export LOADOUT_ROOT
+
+# shellcheck disable=SC1091
+. "$LOADOUT_ROOT/lib/common.sh"
+# shellcheck disable=SC1091
+. "$LOADOUT_ROOT/lib/system.sh"
+# shellcheck disable=SC1091
+. "$LOADOUT_ROOT/lib/releases.sh"
+# shellcheck disable=SC1091
+. "$LOADOUT_ROOT/lib/platform.sh"
+# shellcheck disable=SC1091
+. "$LOADOUT_ROOT/lib/runtimes.sh"
+# shellcheck disable=SC1091
+. "$LOADOUT_ROOT/lib/config.sh"
+# shellcheck disable=SC1091
+. "$LOADOUT_ROOT/lib/windows.sh"
+# shellcheck disable=SC1091
+. "$LOADOUT_ROOT/lib/engine.sh"
+
+usage() {
+    cat <<'EOF'
+Loadout - workstation as code for DevOps engineers
+
+Usage:
+  loadout <command> [options]
+
+Commands:
+  plan       Show the delta without changing the machine
+  apply      Converge the machine on the selected profile
+  check      Exit non-zero when the machine has drifted
+  doctor     Diagnose platform, prerequisites and authentication
+  list       Summarise the selected profile
+  recommend  Show useful workflow-specific additions
+  version    Print the Loadout version
+
+Options:
+  --yes              Apply without an interactive confirmation
+  --skip-windows     Skip Windows host resources when running in WSL
+  --skip-services    Skip service/group convergence (useful in containers)
+  --verbose          Show resources that are already converged
+  --no-colour        Disable ANSI colour output
+  -h, --help         Show this help
+EOF
+}
+
+COMMAND=${1:-help}
+[ "$#" -eq 0 ] || shift
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --yes) LOADOUT_YES=1 ;;
+        --skip-windows) LOADOUT_SKIP_WINDOWS=1 ;;
+        --skip-services) LOADOUT_SKIP_SERVICES=1 ;;
+        --verbose) LOADOUT_VERBOSE=1 ;;
+        --no-colour) LOADOUT_NO_COLOUR=1 ;;
+        -h|--help) COMMAND=help ;;
+        *) loadout_die "Unknown option: $1" ;;
+    esac
+    shift
+done
+
+loadout_init_colours
+
+case "$COMMAND" in
+    help|-h|--help)
+        usage
+        exit 0
+        ;;
+    version)
+        cat "$LOADOUT_ROOT/VERSION"
+        exit 0
+        ;;
+    plan|apply|check|doctor|list|recommend) ;;
+    *) loadout_die "Unknown command: $COMMAND" ;;
+esac
+
+loadout_load_desired_state
+
+case "$COMMAND" in
+    doctor)
+        LOADOUT_VERBOSE=1
+        loadout_doctor
+        ;;
+    list)
+        loadout_list_state
+        ;;
+    recommend)
+        loadout_list_recommendations
+        ;;
+    plan)
+        LOADOUT_MODE=plan
+        loadout_run_engine
+        if [ "$LOADOUT_DRIFT" -eq 0 ]; then
+            printf '\n%sMachine already matches Loadout.%s\n' \
+                "$C_GREEN" "$C_RESET"
+        else
+            printf '\n%s%s change(s) planned.%s\n' \
+                "$C_YELLOW" "$LOADOUT_DRIFT" "$C_RESET"
+        fi
+        ;;
+    check)
+        LOADOUT_MODE=check
+        loadout_run_engine
+        if [ "$LOADOUT_DRIFT" -gt 0 ]; then
+            printf '\n%s%s resource(s) have drifted.%s\n' \
+                "$C_RED" "$LOADOUT_DRIFT" "$C_RESET" >&2
+            exit 1
+        fi
+        printf '\n%sMachine matches Loadout.%s\n' "$C_GREEN" "$C_RESET"
+        ;;
+    apply)
+        LOADOUT_MODE=plan
+        loadout_run_engine
+        if [ "$LOADOUT_DRIFT" -eq 0 ]; then
+            printf '\n%sMachine already matches Loadout.%s\n' \
+                "$C_GREEN" "$C_RESET"
+            exit 0
+        fi
+        printf '\n%s%s change(s) required.%s\n' \
+            "$C_YELLOW" "$LOADOUT_DRIFT" "$C_RESET"
+        if [ "$LOADOUT_YES" -ne 1 ]; then
+            [ -t 0 ] || loadout_die 'Non-interactive apply requires --yes'
+            read -r -p 'Apply this loadout? [y/N] ' answer
+            [[ "$answer" =~ ^[Yy]$ ]] || exit 0
+        fi
+
+        loadout_require_sudo
+        LOADOUT_MODE=apply
+        loadout_reset_drift
+        loadout_run_engine
+
+        LOADOUT_MODE=check
+        loadout_reset_drift
+        loadout_run_engine
+        [ "$LOADOUT_DRIFT" -eq 0 ] ||
+            loadout_die "Apply completed but $LOADOUT_DRIFT resource(s) still drift"
+        printf '\n%sLoadout applied successfully.%s\n' "$C_GREEN" "$C_RESET"
+        ;;
+esac

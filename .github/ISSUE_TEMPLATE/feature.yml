@@ -1,0 +1,29 @@
+name: Feature request
+description: Propose a resource provider, desired-state change or supported tool
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What platform-engineering workflow is currently missing?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed desired state
+      description: Include official sources and ARM64/AMD64 support.
+    validations:
+      required: true
+  - type: dropdown
+    id: default
+    attributes:
+      label: Desired-state placement
+      options:
+        - Default tool
+        - Optional recommendation
+        - Engine capability only
+    validations:
+      required: true
