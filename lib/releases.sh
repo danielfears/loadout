@@ -1,5 +1,17 @@
 # shellcheck shell=bash
 
+loadout_find_release_source() {
+    local extracted=$1
+    local source_name=$2
+    if [[ "$source_name" == */* ]]; then
+        find "$extracted" -type f \
+            -path "$extracted/$source_name" -print -quit
+    else
+        find "$extracted" -type f \
+            -name "$source_name" -print -quit
+    fi
+}
+
 loadout_checksum_for_asset() {
     local repository=$1
     local tag=$2
@@ -82,7 +94,7 @@ loadout_install_release_tool() (
         *.zip) unzip -q "$archive" -d "$extracted" ;;
         *) cp "$archive" "$extracted/$source_name" ;;
     esac
-    source_file=$(find "$extracted" -type f -name "$source_name" -print -quit)
+    source_file=$(loadout_find_release_source "$extracted" "$source_name")
     [ -n "$source_file" ] ||
         loadout_die "Unable to locate $source_name in the $label release"
     mkdir -p "$HOME/.local/bin"
