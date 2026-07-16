@@ -2,7 +2,7 @@
 
 All notable changes to Loadout are documented here.
 
-## Unreleased
+## 0.2.0 - 2026-07-16
 
 ### Added
 
@@ -11,6 +11,13 @@ All notable changes to Loadout are documented here.
 - Version templates so dependency updates change one tested value rather than
   repeated release filenames.
 - Pull-request clean-machine and release URL gates for dependency updates.
+
+### Fixed
+
+- Select release binaries by an unambiguous archive path when an archive also
+  contains a completion file with the same basename.
+- Identify BuildKit integration runs explicitly instead of mistaking their WSL
+  host kernel for a WSL guest.
 
 ## 0.1.1 - 2026-07-16
 
