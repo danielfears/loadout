@@ -8,7 +8,7 @@ delta	delta	0.19.2	dandavison/delta	{version}	delta-{version}-aarch64-unknown-li
 zoxide	zoxide	0.9.9	ajeetdsouza/zoxide	v{version}	zoxide-{version}-aarch64-unknown-linux-musl.tar.gz	zoxide-{version}-x86_64-unknown-linux-musl.tar.gz	zoxide	zoxide	--version	-
 lazygit	lazygit	0.62.1	jesseduffield/lazygit	v{version}	lazygit_{version}_linux_arm64.tar.gz	lazygit_{version}_linux_x86_64.tar.gz	lazygit	lazygit	--version	checksums.txt
 GitHub-CLI	gh	2.93.0	cli/cli	v{version}	gh_{version}_linux_arm64.tar.gz	gh_{version}_linux_amd64.tar.gz	gh	gh	--version	gh_{version}_checksums.txt
-fastfetch	fastfetch	2.64.0	fastfetch-cli/fastfetch	{version}	fastfetch-linux-aarch64.tar.gz	fastfetch-linux-amd64.tar.gz	fastfetch	fastfetch	--version	-
+fastfetch	fastfetch	2.64.0	fastfetch-cli/fastfetch	{version}	fastfetch-linux-aarch64.tar.gz	fastfetch-linux-amd64-polyfilled.tar.gz	fastfetch	fastfetch	--version	-
 oh-my-posh	oh-my-posh	29.14.0	JanDeDobbeleer/oh-my-posh	v{version}	posh-linux-arm64	posh-linux-amd64	posh-linux-arm64	posh-linux-amd64	version	checksums.txt
 Infracost	infracost	0.10.44	infracost/infracost	v{version}	infracost-linux-arm64.tar.gz	infracost-linux-amd64.tar.gz	infracost-linux-arm64	infracost-linux-amd64	--version	{asset}.sha256
 Pandoc	pandoc	3.10	jgm/pandoc	{version}	pandoc-{version}-linux-arm64.tar.gz	pandoc-{version}-linux-amd64.tar.gz	pandoc	pandoc	--version	-

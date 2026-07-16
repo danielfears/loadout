@@ -87,8 +87,13 @@ loadout_install_release_tool() (
         loadout_die "Unable to locate $source_name in the $label release"
     mkdir -p "$HOME/.local/bin"
     install -m 0755 "$source_file" "$HOME/.local/bin/$command_name"
-    loadout_version_matches "$command_name" "$version" "$version_argument" ||
-        loadout_die "$label did not report version $version after installation"
+    if ! loadout_version_matches \
+        "$command_name" "$version" "$version_argument"; then
+        actual_output=$(loadout_version_output \
+            "$command_name" "$version_argument" || true)
+        loadout_die \
+            "$label did not report version $version after installation: ${actual_output:-no output}"
+    fi
 )
 
 loadout_ensure_release_tools() {
