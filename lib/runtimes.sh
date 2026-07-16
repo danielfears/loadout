@@ -28,14 +28,14 @@ loadout_ensure_checkout() {
     if [ -d "$path/.git" ]; then
         [ -z "$(git -C "$path" status --porcelain)" ] ||
             loadout_die "$path has local changes; refusing to change its revision"
-        git -C "$path" fetch --quiet origin "$revision"
     elif [ -e "$path" ]; then
         loadout_die "$path exists but is not a Git checkout"
     else
         git clone --quiet "$remote" "$path"
-        git -C "$path" fetch --quiet origin "$revision"
     fi
-    git -C "$path" checkout --quiet --detach "$revision"
+    git -C "$path" fetch --quiet origin \
+        "refs/tags/$revision:refs/tags/$revision"
+    git -C "$path" switch --quiet --detach "$revision"
 }
 
 loadout_ensure_checkouts() {

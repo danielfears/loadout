@@ -18,4 +18,8 @@ export NVM_DIR="$HOME/.nvm"
 # shellcheck disable=SC1091
 [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
 
-export TASKRC="$HOME/.config/task/taskrc"
+if [ -r "$HOME/.taskrc" ]; then
+    export TASKRC="$HOME/.taskrc"
+else
+    export TASKRC="$HOME/.config/task/taskrc"
+fi

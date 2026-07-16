@@ -14,6 +14,7 @@ test:
 	./tests/test-cli.sh
 	./tests/test-idempotence.sh
 	./tests/test-azure-source.sh
+	./tests/test-checkout.sh
 	./tests/test-release-source.sh
 	./tests/test-manifests.sh
 	python3 ./tests/test-renovate.py

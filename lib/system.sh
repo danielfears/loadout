@@ -260,7 +260,8 @@ loadout_reconcile_legacy_azure_source() {
     loadout_section 'APT source compatibility'
     loadout_change 'retire Loadout legacy Azure CLI source'
     if loadout_is_apply; then
-        backup="${legacy}.bak.$(date +%Y%m%d%H%M%S)"
+        backup="/var/backups/loadout/azure-cli.list.$(date +%Y%m%d%H%M%S)"
+        sudo install -d -m 0755 /var/backups/loadout
         sudo mv "$legacy" "$backup"
         loadout_warn "retired conflicting source to $backup"
     fi

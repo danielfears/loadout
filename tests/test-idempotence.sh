@@ -42,4 +42,18 @@ loadout_ensure_json_overlay \
 [ "$LOADOUT_DRIFT" -eq 0 ]
 jq -e '.existing and .loadout == "enabled"' "$HOME/settings.json" >/dev/null
 
+printf 'personal\n' >"$HOME/personal.conf"
+printf 'default\n' >"$temporary/default.conf"
+loadout_reset_drift
+loadout_ensure_default_file \
+    test-default "$temporary/default.conf" "$HOME/personal.conf" >/dev/null
+[ "$LOADOUT_DRIFT" -eq 0 ]
+[ "$(cat "$HOME/personal.conf")" = personal ]
+
+# shellcheck disable=SC2016
+printf '. "$HOME/.bashrc"\n' >"$HOME/.bash_profile"
+loadout_reset_drift
+loadout_ensure_bash_login "$HOME/.bash_profile" "$block" >/dev/null
+[ "$LOADOUT_DRIFT" -eq 0 ]
+
 printf 'test-idempotence: PASS\n'

@@ -2,6 +2,18 @@
 
 All notable changes to Loadout are documented here.
 
+## 0.2.1 - 2026-07-16
+
+### Fixed
+
+- Retain existing Copilot instructions and PowerShell profiles instead of
+  replacing personalised user files.
+- Recognise an existing login shell that already sources `.bashrc`.
+- Continue using an existing `~/.taskrc` rather than hiding its task database.
+- Request elevation only when a drifted system resource actually needs it.
+- Fetch version-manager tags into explicit local refs before switching an
+  existing checkout.
+
 ## 0.2.0 - 2026-07-16
 
 ### Added

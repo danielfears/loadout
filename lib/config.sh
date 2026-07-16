@@ -20,6 +20,24 @@ loadout_ensure_file() {
     install -m "$mode" "$source" "$destination"
 }
 
+loadout_ensure_default_file() {
+    local label=$1
+    local source=$2
+    local destination=$3
+
+    if [ -e "$destination" ] || [ -L "$destination" ]; then
+        loadout_ok "$label (existing user file retained)"
+        return
+    fi
+    loadout_change "install default $label"
+    if ! loadout_is_apply; then
+        return 0
+    fi
+
+    mkdir -p "$(dirname "$destination")"
+    install -m 0644 "$source" "$destination"
+}
+
 loadout_ensure_symlink() {
     local label=$1
     local source=$2
@@ -117,6 +135,18 @@ loadout_ensure_marked_block() {
     loadout_backup_file "$destination"
     install -m 0644 "$temporary" "$destination"
     rm -f "$temporary"
+}
+
+loadout_ensure_bash_login() {
+    local destination=$1
+    local block=$2
+    if [ -r "$destination" ] &&
+        grep -Eq '(^|[[:space:]])(source|\.)[[:space:]]+.*\.bashrc' \
+            "$destination"; then
+        loadout_ok 'Bash login startup'
+        return
+    fi
+    loadout_ensure_marked_block 'Bash login startup' "$destination" "$block"
 }
 
 loadout_ensure_git_include() {
@@ -241,8 +271,7 @@ fi
 EOF
 )
     loadout_ensure_marked_block 'Bash startup' "$HOME/.bashrc" "$bashrc_block"
-    loadout_ensure_marked_block \
-        'Bash login startup' "$HOME/.bash_profile" "$profile_block"
+    loadout_ensure_bash_login "$HOME/.bash_profile" "$profile_block"
 
     loadout_ensure_file \
         'Loadout Git configuration' \
@@ -253,7 +282,7 @@ EOF
         'Taskwarrior configuration' \
         "$CONFIG_DIR/taskrc" \
         "$HOME/.config/task/taskrc"
-    loadout_ensure_file \
+    loadout_ensure_default_file \
         'Copilot instructions' \
         "$CONFIG_DIR/copilot-instructions.md" \
         "$HOME/.copilot/copilot-instructions.md"
@@ -261,7 +290,7 @@ EOF
         'Copilot settings' \
         "$CONFIG_DIR/copilot-settings.json" \
         "$HOME/.copilot/settings.json"
-    loadout_ensure_file \
+    loadout_ensure_default_file \
         'PowerShell profile' \
         "$CONFIG_DIR/powershell-profile.ps1" \
         "$HOME/.config/powershell/profile.ps1"

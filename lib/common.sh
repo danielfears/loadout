@@ -160,11 +160,6 @@ loadout_detect_platform() {
     export LOADOUT_ARCH LOADOUT_DEB_ARCH LOADOUT_RUST_ARCH LOADOUT_PWSH_ARCH
 }
 
-loadout_require_sudo() {
-    command -v sudo >/dev/null 2>&1 || loadout_die 'sudo is required'
-    sudo -v
-}
-
 loadout_reset_drift() {
     LOADOUT_DRIFT=0
 }

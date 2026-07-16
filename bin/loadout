@@ -136,7 +136,6 @@ case "$COMMAND" in
             [[ "$answer" =~ ^[Yy]$ ]] || exit 0
         fi
 
-        loadout_require_sudo
         LOADOUT_MODE=apply
         loadout_reset_drift
         loadout_run_engine

@@ -125,6 +125,26 @@ function Ensure-File {
     Copy-Item -LiteralPath $Source -Destination $Destination -Force
 }
 
+function Ensure-DefaultFile {
+    param(
+        [string]$Label,
+        [string]$Source,
+        [string]$Destination
+    )
+
+    if (Test-Path -LiteralPath $Destination) {
+        Write-Converged "$Label (existing user file retained)"
+        return
+    }
+    Write-Drift "install default $Label"
+    if ($Mode -ne "Apply") {
+        return
+    }
+    New-Item -ItemType Directory -Path (Split-Path -Parent $Destination) `
+        -Force | Out-Null
+    Copy-Item -LiteralPath $Source -Destination $Destination
+}
+
 function Merge-JsonObjects {
     param(
         [object]$Base,
@@ -343,7 +363,7 @@ Ensure-JsonOverlay `
     -Label "Copilot settings" `
     -OverlayPath (Join-Path $configDir "copilot-settings.json") `
     -Destination (Join-Path $HOME ".copilot\settings.json")
-Ensure-File `
+Ensure-DefaultFile `
     -Label "Copilot instructions" `
     -Source (Join-Path $configDir "copilot-instructions.md") `
     -Destination (Join-Path $HOME ".copilot\copilot-instructions.md")
