@@ -65,3 +65,11 @@ status.
 
 This makes drift explainable and allows `check` to run independently from
 previous Loadout executions.
+
+## Version lifecycle
+
+Desired versions stay pinned so a clean-machine run is reproducible. Renovate
+updates the single version field for each dependency and opens a pull request.
+Version-bearing release tags and filenames use `{version}` templates, avoiding
+multi-file manual edits. Non-major updates can merge only after the repository
+test workflows pass.

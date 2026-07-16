@@ -193,6 +193,18 @@ Each resource owns its own inspection and convergence logic:
 
 Re-running `loadout apply` on a converged machine performs no managed changes.
 
+### Staying current without sacrificing reproducibility
+
+Loadout does not resolve untested “latest” versions during installation.
+Renovate updates pinned releases, runtimes, npm packages and PowerShell modules
+every week. Patch and minor updates auto-merge only after Linux/Windows CI,
+ARM64/AMD64 download validation and clean-machine convergence pass. Major
+updates remain visible for review.
+
+Downstream forks can activate this by installing the
+[Renovate GitHub App](https://github.com/apps/renovate) for their repository;
+all update policy lives in `renovate.json`.
+
 ## Architecture
 
 ```mermaid

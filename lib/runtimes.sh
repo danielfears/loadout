@@ -2,22 +2,25 @@
 
 loadout_checkout_matches() {
     local path=$1
-    local commit=$2
-    [ -d "$path/.git" ] &&
-        [ "$(git -C "$path" rev-parse HEAD 2>/dev/null || true)" = "$commit" ]
+    local revision=$2
+    local expected
+    [ -d "$path/.git" ] || return 1
+    expected=$(git -C "$path" rev-parse "$revision^{commit}" 2>/dev/null || true)
+    [ -n "$expected" ] &&
+        [ "$(git -C "$path" rev-parse HEAD 2>/dev/null || true)" = "$expected" ]
 }
 
 loadout_ensure_checkout() {
     local label=$1
     local path=$2
     local remote=$3
-    local commit=$4
+    local revision=$4
 
-    if loadout_checkout_matches "$path" "$commit"; then
+    if loadout_checkout_matches "$path" "$revision"; then
         loadout_ok "$label checkout"
         return
     fi
-    loadout_change "pin $label checkout to $commit"
+    loadout_change "pin $label checkout to $revision"
     if ! loadout_is_apply; then
         return 0
     fi
@@ -25,24 +28,27 @@ loadout_ensure_checkout() {
     if [ -d "$path/.git" ]; then
         [ -z "$(git -C "$path" status --porcelain)" ] ||
             loadout_die "$path has local changes; refusing to change its revision"
-        git -C "$path" fetch --quiet origin "$commit"
+        git -C "$path" fetch --quiet origin "$revision"
     elif [ -e "$path" ]; then
         loadout_die "$path exists but is not a Git checkout"
     else
         git clone --quiet "$remote" "$path"
-        git -C "$path" fetch --quiet origin "$commit"
+        git -C "$path" fetch --quiet origin "$revision"
     fi
-    git -C "$path" checkout --quiet --detach "$commit"
+    git -C "$path" checkout --quiet --detach "$revision"
 }
 
 loadout_ensure_checkouts() {
+    local fzf_version
+    fzf_version=$(awk -F '\t' '$2 == "fzf" {print $3; exit}' \
+        "$MANIFEST_DIR/release-tools.tsv")
     loadout_section 'Version-manager checkouts'
     loadout_ensure_checkout \
-        fzf "$HOME/.fzf" https://github.com/junegunn/fzf.git "$FZF_COMMIT"
+        fzf "$HOME/.fzf" https://github.com/junegunn/fzf.git "v$fzf_version"
     loadout_ensure_checkout \
-        nvm "$HOME/.nvm" https://github.com/nvm-sh/nvm.git "$NVM_COMMIT"
+        nvm "$HOME/.nvm" https://github.com/nvm-sh/nvm.git "v$NVM_VERSION"
     loadout_ensure_checkout \
-        tfenv "$HOME/.tfenv" https://github.com/tfutils/tfenv.git "$TFENV_COMMIT"
+        tfenv "$HOME/.tfenv" https://github.com/tfutils/tfenv.git "v$TFENV_VERSION"
 }
 
 loadout_source_nvm() {

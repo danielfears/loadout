@@ -72,7 +72,11 @@ loadout_is_apply() {
 }
 
 loadout_is_container() {
-    [ -e /.dockerenv ] || [ -e /run/.containerenv ]
+    [ "${LOADOUT_CONTAINER:-0}" = 1 ] ||
+        [ -e /.dockerenv ] ||
+        [ -e /run/.containerenv ] ||
+        grep -Eq '/(docker|containerd|kubepods|libpod)(/|$)' \
+            /proc/1/cgroup 2>/dev/null
 }
 
 loadout_is_wsl() {
@@ -83,6 +87,12 @@ loadout_is_wsl() {
 loadout_read_lines() {
     local file=$1
     awk 'NF && $1 !~ /^#/ { print }' "$file"
+}
+
+loadout_expand_version() {
+    local template=$1
+    local version=$2
+    printf '%s\n' "${template//\{version\}/$version}"
 }
 
 loadout_version_output() {

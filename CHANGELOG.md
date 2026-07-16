@@ -2,6 +2,16 @@
 
 All notable changes to Loadout are documented here.
 
+## Unreleased
+
+### Added
+
+- Renovate management for pinned release tools, runtimes, npm packages and
+  PowerShell modules.
+- Version templates so dependency updates change one tested value rather than
+  repeated release filenames.
+- Pull-request clean-machine and release URL gates for dependency updates.
+
 ## 0.1.1 - 2026-07-16
 
 ### Fixed

@@ -34,6 +34,10 @@ For release tools:
 Do not use `curl | sh` installers when a direct package or release artefact is
 available.
 
+Version values remain pinned for reproducibility. Renovate updates supported
+pins automatically; non-major updates merge only after CI, release URL checks
+and clean-machine convergence pass.
+
 ## Resource-provider contract
 
 Each resource must:

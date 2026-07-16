@@ -13,8 +13,22 @@ awk -F '\t' '
         print FNR ": expected 11 fields, got " NF >"/dev/stderr"
         failed=1
     }
+    !/^#/ && NF {
+        for (field=5; field<=11; field++) {
+            if (index($field, $3)) {
+                print FNR ": version must appear only in field 3; use {version} templates" >"/dev/stderr"
+                failed=1
+            }
+        }
+        if (index($5, "{version}") == 0) {
+            print FNR ": tag template must contain {version}" >"/dev/stderr"
+            failed=1
+        }
+    }
     END { exit failed }
 ' "$ROOT/manifests/release-tools.tsv"
+
+jq -e . "$ROOT/renovate.json" >/dev/null
 
 if rg -i \
     'gitlab\.tooling\.|mod\.gov\.uk|danielfears@microsoft|BEGIN .*PRIVATE KEY|ghp_[A-Za-z0-9]' \

@@ -15,6 +15,7 @@ test:
 	./tests/test-idempotence.sh
 	./tests/test-azure-source.sh
 	./tests/test-manifests.sh
+	python3 ./tests/test-renovate.py
 
 integration:
 	./tests/integration.sh

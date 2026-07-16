@@ -43,15 +43,17 @@ loadout apply
 2. Installed command
 3. Expected version substring
 4. GitHub `owner/repository`
-5. Release tag
-6. ARM64 asset
-7. AMD64 asset
-8. ARM64 binary filename inside the asset
-9. AMD64 binary filename inside the asset
+5. Release tag template
+6. ARM64 asset template
+7. AMD64 asset template
+8. ARM64 binary filename template inside the asset
+9. AMD64 binary filename template inside the asset
 10. Version argument
 11. Checksum asset, `{asset}.suffix`, or `-`
 
 The generic provider handles tarballs, ZIP archives and raw binaries.
+Use `{version}` in templates instead of repeating the current version;
+Renovate updates only field three and the installer expands the templates.
 
 ## Configuration overlays
 

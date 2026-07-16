@@ -96,28 +96,33 @@ loadout_ensure_release_tools() {
     local command_name
     local version
     local repository
-    local tag
-    local arm_asset
-    local amd_asset
-    local arm_source
-    local amd_source
+    local tag_template
+    local arm_asset_template
+    local amd_asset_template
+    local arm_source_template
+    local amd_source_template
     local version_argument
-    local checksum_name
+    local checksum_template
+    local tag
     local asset
     local source_name
+    local checksum_name
 
     loadout_section 'Pinned command-line tools'
     while IFS=$'\t' read -r \
-        label command_name version repository tag \
-        arm_asset amd_asset arm_source amd_source \
-        version_argument checksum_name; do
+        label command_name version repository tag_template \
+        arm_asset_template amd_asset_template \
+        arm_source_template amd_source_template \
+        version_argument checksum_template; do
         case "$label" in ''|\#*) continue ;; esac
+        tag=$(loadout_expand_version "$tag_template" "$version")
+        checksum_name=$(loadout_expand_version "$checksum_template" "$version")
         if [ "$LOADOUT_ARCH" = arm64 ]; then
-            asset=$arm_asset
-            source_name=$arm_source
+            asset=$(loadout_expand_version "$arm_asset_template" "$version")
+            source_name=$(loadout_expand_version "$arm_source_template" "$version")
         else
-            asset=$amd_asset
-            source_name=$amd_source
+            asset=$(loadout_expand_version "$amd_asset_template" "$version")
+            source_name=$(loadout_expand_version "$amd_source_template" "$version")
         fi
 
         if loadout_version_matches "$command_name" "$version" "$version_argument"; then

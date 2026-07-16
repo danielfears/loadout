@@ -20,6 +20,8 @@ to installers receive the same scrutiny as production deployment code.
 - Versions and release URLs are explicit manifest data.
 - Published SHA-256 manifests are verified when upstream provides them.
 - Sources without detached checksums produce a visible warning.
+- Renovate waits three days after a release and requires the test gates before
+  non-major version updates can merge.
 - Managed files are backed up before replacement.
 - Secrets, authentication caches and private keys are never configuration content.
 - Cloud authentication remains interactive.

@@ -16,6 +16,7 @@ COPY --chown=loadout:loadout . /home/loadout/loadout
 USER loadout
 WORKDIR /home/loadout/loadout
 ENV PATH="/home/loadout/.local/bin:${PATH}"
+ENV LOADOUT_CONTAINER=1
 
 RUN ./bootstrap.sh \
         --skip-windows \

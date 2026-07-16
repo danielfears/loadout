@@ -2,6 +2,14 @@ name: Clean-machine integration
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - "bootstrap.sh"
+      - "config/**"
+      - "lib/**"
+      - "manifests/**"
+      - "scripts/**"
+      - "tests/integration/**"
 
 permissions:
   contents: read
@@ -11,6 +19,6 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Build twice-converged image
         run: ./tests/integration.sh
